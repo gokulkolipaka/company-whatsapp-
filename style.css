@@ -1564,3 +1564,74 @@ select.form-control {
 .emoji-picker::-webkit-scrollbar-track {
   background: transparent;
 }
+/* Dark mode styles */
+body.dark-mode {
+    --color-background: #121212;
+    --color-background-secondary: #1e1e1e;
+    --color-text: #e0e0e0;
+    --color-text-secondary: #a0a0a0;
+    --color-primary: #0a84ff;
+    --color-primary-dark: #0066cc;
+    background-color: var(--color-background);
+    color: var(--color-text);
+}
+
+body.dark-mode .chat-app,
+body.dark-mode .auth-page {
+    background-color: var(--color-background-secondary);
+    color: var(--color-text);
+}
+
+body.dark-mode .message-bubble {
+    background-color: #333333;
+    color: var(--color-text);
+}
+
+body.dark-mode .chat-item.active,
+body.dark-mode .chat-item:hover {
+    background-color: #333333;
+    color: var(--color-primary);
+}
+
+body.dark-mode .btn.btn--primary {
+    background-color: var(--color-primary);
+    color: #fff;
+}
+
+body.dark-mode .btn.btn--outline {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+body.dark-mode .modal-content {
+    background-color: var(--color-background-secondary);
+    color: var(--color-text);
+}
+
+body.dark-mode input,
+body.dark-mode textarea {
+    background-color: #222222;
+    color: var(--color-text);
+    border-color: #555555;
+}
+
+body.dark-mode .notification.info {
+    background-color: #0a84ff;
+    color: white;
+}
+
+body.dark-mode .notification.success {
+    background-color: #28a745;
+    color: white;
+}
+
+body.dark-mode .notification.error {
+    background-color: #dc3545;
+    color: white;
+}
+
+body.dark-mode .notification.warning {
+    background-color: #ffc107;
+    color: black;
+}
+
