@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Messenger - WhatsApp Style</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Network Warning -->
+    <div id="networkWarning" class="network-warning hidden">
+        <div class="network-warning-content">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h2>Network Restricted</h2>
+            <p>This application is restricted to company network only.</p>
+            <p>Please connect to the corporate VPN or intranet.</p>
+            <button class="btn btn--primary" onclick="location.reload()">Retry Connection</button>
+        </div>
+    </div>
+
+    <!-- Authentication Page -->
+    <div id="authPage" class="auth-page">
+        <div class="auth-container">
+            <div class="company-header">
+                <img id="authLogo" src="" alt="Company Logo" class="company-logo hidden">
+                <h1 id="authCompanyName">GravitiCorp Messenger</h1>
+                <p>Secure Internal Communication Platform</p>
+            </div>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+                <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form active">
+                <h2>Welcome Back</h2>
+                <form id="loginFormElement" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label">Phone Number or Email</label>
+                        <input type="text" id="loginPhone" class="form-control" placeholder="+1234567890 or email@company.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn--primary btn--full-width">Sign In</button>
+                </form>
+                <a href="#" class="forgot-password" onclick="showForgotPassword()">Forgot Password?</a>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerForm" class="auth-form">
+                <h2>Create Account</h2>
+                <form id="registerFormElement" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" id="registerName" class="form-control" placeholder="Your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" id="registerPhone" class="form-control" placeholder="+1234567890" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="registerEmail" class="form-control" placeholder="email@company.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" id="registerPassword" class="form-control" placeholder="Create a password" required>
+                    </div>
+                    <button type="submit" class="btn btn--primary btn--full-width">Create Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chat Application -->
+    <div id="chatApp" class="chat-app hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="company-header">
+                <img id="appLogo" src="" alt="Company Logo" class="company-logo hidden">
+                <span id="appCompanyName">GravitiCorp Messenger</span>
+            </div>
+            <div class="header-actions">
+                <button id="adminBtn" class="btn btn--outline" onclick="showAdminPanel()" style="display: none;">
+                    <i class="fas fa-cog"></i> Admin
+                </button>
+                <button class="btn btn--outline" onclick="showProfile()">
+                    <i class="fas fa-user"></i> Profile
+                </button>
+                <button class="btn btn--outline" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h3>Chats</h3>
+                    <button class="btn btn--secondary btn--sm" onclick="showCreateGroup()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="chatSearch" class="form-control" placeholder="Search chats..." oninput="filterChats(this.value)">
+                </div>
+                <div id="chatList" class="chat-list">
+                    <!-- Chat items will be dynamically loaded -->
+                </div>
+            </aside>
+
+            <!-- Chat Area -->
+            <section class="chat-area">
+                <div id="welcomeScreen" class="welcome-screen">
+                    <i class="fas fa-comments"></i>
+                    <h3>Welcome to Company Messenger</h3>
+                    <p>Select a chat to start messaging</p>
+                    <div class="status status--info">
+                        <strong>Select Chat</strong>Click on a chat to start
+                    </div>
+                </div>
+
+                <div id="chatWindow" class="chat-window hidden">
+                    <!-- Chat Header -->
+                    <div class="chat-header">
+                        <div class="chat-info">
+                            <div id="chatAvatar" class="avatar">JD</div>
+                            <div class="chat-details">
+                                <h4 id="chatName">Chat Name</h4>
+                                <div id="chatStatus" class="chat-status">Online</div>
+                            </div>
+                        </div>
+                        <div class="chat-actions">
+                            <button class="btn btn--secondary btn--sm" onclick="showChatInfo()">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Messages Container -->
+                    <div id="messagesContainer" class="messages-container">
+                        <!-- Messages will be dynamically loaded -->
+                    </div>
+
+                    <!-- Message Input -->
+                    <div class="message-input-container">
+                        <div class="message-input">
+                            <button class="attachment-btn" onclick="toggleAttachmentMenu()">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <button class="emoji-btn" onclick="toggleEmojiPicker()">
+                                <i class="fas fa-smile"></i>
+                            </button>
+                            <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="handleMessageKeyPress(event)" autocomplete="off">
+                            <button class="send-btn" onclick="sendMessage()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+
+                        <!-- Attachment Menu -->
+                        <div id="attachmentMenu" class="attachment-menu hidden">
+                            <button onclick="selectFile('document')">
+                                <i class="fas fa-file-alt"></i> Document
+                            </button>
+                            <button onclick="selectFile('image')">
+                                <i class="fas fa-image"></i> Photo
+                            </button>
+                            <button onclick="selectFile('audio')">
+                                <i class="fas fa-microphone"></i> Audio
+                            </button>
+                        </div>
+
+                        <!-- Emoji Picker -->
+                        <div id="emojiPicker" class="emoji-picker hidden">
+                            <div class="emoji-grid">
+                                <span onclick="insertEmoji('😀')">😀</span>
+                                <span onclick="insertEmoji('😃')">😃</span>
+                                <span onclick="insertEmoji('😄')">😄</span>
+                                <span onclick="insertEmoji('😁')">😁</span>
+                                <span onclick="insertEmoji('😆')">😆</span>
+                                <span onclick="insertEmoji('😅')">😅</span>
+                                <span onclick="insertEmoji('😂')">😂</span>
+                                <span onclick="insertEmoji('🤣')">🤣</span>
+                                <span onclick="insertEmoji('😊')">😊</span>
+                                <span onclick="insertEmoji('😇')">😇</span>
+                                <span onclick="insertEmoji('🙂')">🙂</span>
+                                <span onclick="insertEmoji('🙃')">🙃</span>
+                                <span onclick="insertEmoji('😉')">😉</span>
+                                <span onclick="insertEmoji('😌')">😌</span>
+                                <span onclick="insertEmoji('😍')">😍</span>
+                                <span onclick="insertEmoji('🥰')">🥰</span>
+                                <span onclick="insertEmoji('😘')">😘</span>
+                                <span onclick="insertEmoji('😗')">😗</span>
+                                <span onclick="insertEmoji('😙')">😙</span>
+                                <span onclick="insertEmoji('😚')">😚</span>
+                                <span onclick="insertEmoji('😋')">😋</span>
+                                <span onclick="insertEmoji('😛')">😛</span>
+                                <span onclick="insertEmoji('😝')">😝</span>
+                                <span onclick="insertEmoji('😜')">😜</span>
+                                <span onclick="insertEmoji('🤪')">🤪</span>
+                                <span onclick="insertEmoji('🤨')">🤨</span>
+                                <span onclick="insertEmoji('🧐')">🧐</span>
+                                <span onclick="insertEmoji('🤓')">🤓</span>
+                                <span onclick="insertEmoji('😎')">😎</span>
+                                <span onclick="insertEmoji('🤩')">🤩</span>
+                                <span onclick="insertEmoji('🥳')">🥳</span>
+                                <span onclick="insertEmoji('😏')">😏</span>
+                                <span onclick="insertEmoji('😒')">😒</span>
+                                <span onclick="insertEmoji('😞')">😞</span>
+                                <span onclick="insertEmoji('😔')">😔</span>
+                                <span onclick="insertEmoji('😟')">😟</span>
+                                <span onclick="insertEmoji('😕')">😕</span>
+                                <span onclick="insertEmoji('🙁')">🙁</span>
+                                <span onclick="insertEmoji('😣')">😣</span>
+                                <span onclick="insertEmoji('😖')">😖</span>
+                                <span onclick="insertEmoji('😫')">😫</span>
+                                <span onclick="insertEmoji('😩')">😩</span>
+                                <span onclick="insertEmoji('🥺')">🥺</span>
+                                <span onclick="insertEmoji('😢')">😢</span>
+                                <span onclick="insertEmoji('😭')">😭</span>
+                                <span onclick="insertEmoji('😤')">😤</span>
+                                <span onclick="insertEmoji('😠')">😠</span>
+                                <span onclick="insertEmoji('😡')">😡</span>
+                                <span onclick="insertEmoji('🤬')">🤬</span>
+                                <span onclick="insertEmoji('🤯')">🤯</span>
+                                <span onclick="insertEmoji('😳')">😳</span>
+                                <span onclick="insertEmoji('🥵')">🥵</span>
+                                <span onclick="insertEmoji('🥶')">🥶</span>
+                                <span onclick="insertEmoji('😱')">😱</span>
+                                <span onclick="insertEmoji('😨')">😨</span>
+                                <span onclick="insertEmoji('😰')">😰</span>
+                                <span onclick="insertEmoji('😥')">😥</span>
+                                <span onclick="insertEmoji('😓')">😓</span>
+                                <span onclick="insertEmoji('🤗')">🤗</span>
+                                <span onclick="insertEmoji('🤔')">🤔</span>
+                                <span onclick="insertEmoji('🤭')">🤭</span>
+                                <span onclick="insertEmoji('🤫')">🤫</span>
+                                <span onclick="insertEmoji('🤥')">🤥</span>
+                                <span onclick="insertEmoji('😶')">😶</span>
+                                <span onclick="insertEmoji('😐')">😐</span>
+                                <span onclick="insertEmoji('😑')">😑</span>
+                                <span onclick="insertEmoji('😬')">😬</span>
+                                <span onclick="insertEmoji('🙄')">🙄</span>
+                                <span onclick="insertEmoji('😯')">😯</span>
+                                <span onclick="insertEmoji('😦')">😦</span>
+                                <span onclick="insertEmoji('😧')">😧</span>
+                                <span onclick="insertEmoji('😮')">😮</span>
+                                <span onclick="insertEmoji('😲')">😲</span>
+                                <span onclick="insertEmoji('👍')">👍</span>
+                                <span onclick="insertEmoji('👎')">👎</span>
+                                <span onclick="insertEmoji('👏')">👏</span>
+                                <span onclick="insertEmoji('🙌')">🙌</span>
+                                <span onclick="insertEmoji('❤️')">❤️</span>
+                                <span onclick="insertEmoji('💯')">💯</span>
+                                <span onclick="insertEmoji('🔥')">🔥</span>
+                                <span onclick="insertEmoji('⭐')">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Admin Panel Modal -->
+    <div id="adminModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Admin Panel</h3>
+                <button class="modal-close" onclick="closeModal('adminModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="admin-tabs">
+                    <button class="admin-tab active" onclick="switchAdminTab('users')">Users</button>
+                    <button class="admin-tab" onclick="switchAdminTab('settings')">Settings</button>
+                    <button class="admin-tab" onclick="switchAdminTab('branding')">Branding</button>
+                </div>
+
+                <div id="adminUsersTab" class="admin-tab-content active">
+                    <h4>User Management</h4>
+                    <div id="usersList">
+                        <!-- Users will be dynamically loaded -->
+                    </div>
+                </div>
+
+                <div id="adminSettingsTab" class="admin-tab-content">
+                    <h4>Application Settings</h4>
+                    <form id="settingsForm" onsubmit="updateSettings(event)">
+                        <div class="form-group">
+                            <label class="form-label">Allowed IP Ranges (CIDR notation)</label>
+                            <textarea id="allowedIPs" class="form-control" rows="3" placeholder="192.168.1.0/24&#10;10.0.0.0/8"></textarea>
+                        </div>
+                        <div class="disable-controls">
+                            <button type="button" class="btn btn--secondary" onclick="toggleAppDisable()">
+                                <span id="disableButtonText">Disable App</span>
+                            </button>
+                            <div class="form-group" style="flex: 1;">
+                                <label class="form-label">Disable Until (optional)</label>
+                                <input type="datetime-local" id="disableUntil" class="form-control">
+                            </div>
+                        </div>
+                        <div class="warning-text">
+                            <strong>Warning:</strong> Disabling the app will prevent all users except admins from accessing it.
+                        </div>
+                        <button type="submit" class="btn btn--primary">Save Settings</button>
+                    </form>
+                </div>
+
+                <div id="adminBrandingTab" class="admin-tab-content">
+                    <h4>Company Branding</h4>
+                    <form id="brandingForm" onsubmit="updateBranding(event)">
+                        <div class="form-group">
+                            <label class="form-label">Company Name</label>
+                            <input type="text" id="companyName" class="form-control" placeholder="Your Company Name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Logo URL</label>
+                            <input type="url" id="logoUrl" class="form-control" placeholder="https://example.com/logo.png">
+                        </div>
+                        <button type="submit" class="btn btn--primary">Update Branding</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Group Modal -->
+    <div id="createGroupModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create Group</h3>
+                <button class="modal-close" onclick="closeModal('createGroupModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="createGroupForm" onsubmit="createGroup(event)">
+                    <div class="form-group">
+                        <label class="form-label">Group Name</label>
+                        <input type="text" id="groupName" class="form-control" placeholder="Enter group name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Select Members</label>
+                        <div id="userCheckboxes" class="user-checkboxes">
+                            <!-- User checkboxes will be dynamically loaded -->
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn--primary btn--full-width">Create Group</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Profile</h3>
+                <button class="modal-close" onclick="closeModal('profileModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="profileForm" onsubmit="updateProfile(event)">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" id="profileName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="profileEmail" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" id="profilePhone" class="form-control" readonly>
+                    </div>
+                    <button type="submit" class="btn btn--primary">Update Profile</button>
+                    <button type="button" class="btn btn--secondary" onclick="showChangePassword()">Change Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="passwordModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Change Password</h3>
+                <button class="modal-close" onclick="closeModal('passwordModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="passwordForm" onsubmit="changeUserPassword(event)">
+                    <div class="form-group">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" id="currentPassword" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <input type="password" id="newPassword" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password" id="confirmPassword" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn--primary">Change Password</button>
+                    <button type="button" class="btn btn--secondary" onclick="skipPasswordChange()">Skip for Now</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Reset Password</h3>
+                <button class="modal-close" onclick="closeModal('forgotPasswordModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="forgotPasswordForm" onsubmit="resetPassword(event)">
+                    <div class="form-group">
+                        <label class="form-label">Phone Number or Email</label>
+                        <input type="text" id="resetPhone" class="form-control" placeholder="Enter your phone or email" required>
+                    </div>
+                    <button type="submit" class="btn btn--primary btn--full-width">Reset Password</button>
+                </form>
+                <p class="text-center" style="margin-top: 16px; color: var(--color-text-secondary);">
+                    In a real application, this would send a reset link to your email or SMS.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Info Modal -->
+    <div id="chatInfoModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Chat Information</h3>
+                <button class="modal-close" onclick="closeModal('chatInfoModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="chatInfoContent">
+                    <!-- Chat info will be dynamically loaded -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Container -->
+    <div id="notificationsContainer" class="notifications-container">
+        <!-- Notifications will be dynamically added here -->
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
