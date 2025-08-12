@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Company Messenger - WhatsApp Style</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
     <!-- Network Warning -->
@@ -24,7 +24,7 @@
     <div id="authPage" class="auth-page">
         <div class="auth-container">
             <div class="company-header">
-                <img id="authLogo" src="" alt="Company Logo" class="company-logo hidden">
+                <img id="authLogo" src="" alt="Company Logo" class="company-logo hidden" />
                 <h1 id="authCompanyName">GravitiCorp Messenger</h1>
                 <p>Secure Internal Communication Platform</p>
             </div>
@@ -40,11 +40,11 @@
                 <form id="loginFormElement" onsubmit="handleLogin(event)">
                     <div class="form-group">
                         <label class="form-label">Phone Number or Email</label>
-                        <input type="text" id="loginPhone" class="form-control" placeholder="+1234567890 or email@company.com" required>
+                        <input type="text" id="loginPhone" class="form-control" placeholder="+1234567890 or email@company.com" required />
                     </div>
                     <div class="form-group">
                         <label class="form-label">Password</label>
-                        <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password" required>
+                        <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password" required />
                     </div>
                     <button type="submit" class="btn btn--primary btn--full-width">Sign In</button>
                 </form>
@@ -57,19 +57,19 @@
                 <form id="registerFormElement" onsubmit="handleRegister(event)">
                     <div class="form-group">
                         <label class="form-label">Full Name</label>
-                        <input type="text" id="registerName" class="form-control" placeholder="Your full name" required>
+                        <input type="text" id="registerName" class="form-control" placeholder="Your full name" required />
                     </div>
                     <div class="form-group">
                         <label class="form-label">Phone Number</label>
-                        <input type="tel" id="registerPhone" class="form-control" placeholder="+1234567890" required>
+                        <input type="tel" id="registerPhone" class="form-control" placeholder="+1234567890" required />
                     </div>
                     <div class="form-group">
                         <label class="form-label">Email</label>
-                        <input type="email" id="registerEmail" class="form-control" placeholder="email@company.com" required>
+                        <input type="email" id="registerEmail" class="form-control" placeholder="email@company.com" required />
                     </div>
                     <div class="form-group">
                         <label class="form-label">Password</label>
-                        <input type="password" id="registerPassword" class="form-control" placeholder="Create a password" required>
+                        <input type="password" id="registerPassword" class="form-control" placeholder="Create a password" required />
                     </div>
                     <button type="submit" class="btn btn--primary btn--full-width">Create Account</button>
                 </form>
@@ -82,10 +82,13 @@
         <!-- Header -->
         <header class="app-header">
             <div class="company-header">
-                <img id="appLogo" src="" alt="Company Logo" class="company-logo hidden">
+                <img id="appLogo" src="" alt="Company Logo" class="company-logo hidden" />
                 <span id="appCompanyName">GravitiCorp Messenger</span>
             </div>
             <div class="header-actions">
+                <button id="darkModeToggle" class="btn btn--outline" title="Toggle Dark Mode" aria-label="Toggle Dark Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
                 <button id="adminBtn" class="btn btn--outline" onclick="showAdminPanel()" style="display: none;">
                     <i class="fas fa-cog"></i> Admin
                 </button>
@@ -109,7 +112,7 @@
                     </button>
                 </div>
                 <div class="search-container">
-                    <input type="text" id="chatSearch" class="form-control" placeholder="Search chats..." oninput="filterChats(this.value)">
+                    <input type="text" id="chatSearch" class="form-control" placeholder="Search chats..." oninput="filterChats(this.value)" />
                 </div>
                 <div id="chatList" class="chat-list">
                     <!-- Chat items will be dynamically loaded -->
@@ -158,7 +161,13 @@
                             <button class="emoji-btn" onclick="toggleEmojiPicker()">
                                 <i class="fas fa-smile"></i>
                             </button>
-                            <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="handleMessageKeyPress(event)" autocomplete="off">
+                            <input
+                                type="text"
+                                id="messageInput"
+                                placeholder="Type a message..."
+                                onkeypress="handleMessageKeyPress(event)"
+                                autocomplete="off"
+                            />
                             <button class="send-btn" onclick="sendMessage()">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
@@ -271,27 +280,49 @@
 
     <!-- Modals -->
     <!-- Admin Panel Modal -->
-    <div id="adminModal" class="modal hidden">
+    <div id="adminModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Admin Panel</h3>
-                <button class="modal-close" onclick="closeModal('adminModal')">&times;</button>
+                <h3 id="adminModalTitle">Admin Panel</h3>
+                <button class="modal-close" onclick="closeModal('adminModal')" aria-label="Close Admin Panel">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="admin-tabs">
-                    <button class="admin-tab active" onclick="switchAdminTab('users')">Users</button>
-                    <button class="admin-tab" onclick="switchAdminTab('settings')">Settings</button>
-                    <button class="admin-tab" onclick="switchAdminTab('branding')">Branding</button>
+                <div class="admin-tabs" role="tablist">
+                    <button role="tab" aria-selected="true" class="admin-tab active" onclick="switchAdminTab('users')" id="tabUsers">Users</button>
+                    <button role="tab" aria-selected="false" class="admin-tab" onclick="switchAdminTab('settings')" id="tabSettings">Settings</button>
+                    <button role="tab" aria-selected="false" class="admin-tab" onclick="switchAdminTab('branding')" id="tabBranding">Branding</button>
                 </div>
 
-                <div id="adminUsersTab" class="admin-tab-content active">
+                <div id="adminUsersTab" class="admin-tab-content active" role="tabpanel" aria-labelledby="tabUsers">
                     <h4>User Management</h4>
                     <div id="usersList">
                         <!-- Users will be dynamically loaded -->
                     </div>
+
+                    <!-- Add User Form for admin -->
+                    <form id="addUserForm" class="add-user-form" onsubmit="addUser(event)">
+                        <h5>Add New User</h5>
+                        <div class="form-group">
+                            <label class="form-label" for="newUserName">Full Name</label>
+                            <input type="text" id="newUserName" class="form-control" placeholder="Full Name" required />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="newUserPhone">Phone Number</label>
+                            <input type="tel" id="newUserPhone" class="form-control" placeholder="+1234567890" required />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="newUserEmail">Email</label>
+                            <input type="email" id="newUserEmail" class="form-control" placeholder="email@company.com" required />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="newUserPassword">Password</label>
+                            <input type="password" id="newUserPassword" class="form-control" placeholder="Set Password" required />
+                        </div>
+                        <button type="submit" class="btn btn--primary btn--full-width">Add User</button>
+                    </form>
                 </div>
 
-                <div id="adminSettingsTab" class="admin-tab-content">
+                <div id="adminSettingsTab" class="admin-tab-content" role="tabpanel" aria-labelledby="tabSettings">
                     <h4>Application Settings</h4>
                     <form id="settingsForm" onsubmit="updateSettings(event)">
                         <div class="form-group">
@@ -304,7 +335,7 @@
                             </button>
                             <div class="form-group" style="flex: 1;">
                                 <label class="form-label">Disable Until (optional)</label>
-                                <input type="datetime-local" id="disableUntil" class="form-control">
+                                <input type="datetime-local" id="disableUntil" class="form-control" />
                             </div>
                         </div>
                         <div class="warning-text">
@@ -314,16 +345,17 @@
                     </form>
                 </div>
 
-                <div id="adminBrandingTab" class="admin-tab-content">
+                <div id="adminBrandingTab" class="admin-tab-content" role="tabpanel" aria-labelledby="tabBranding">
                     <h4>Company Branding</h4>
                     <form id="brandingForm" onsubmit="updateBranding(event)">
                         <div class="form-group">
-                            <label class="form-label">Company Name</label>
-                            <input type="text" id="companyName" class="form-control" placeholder="Your Company Name">
+                            <label class="form-label" for="companyName">Company Name</label>
+                            <input type="text" id="companyName" class="form-control" placeholder="Your Company Name" />
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Logo URL</label>
-                            <input type="url" id="logoUrl" class="form-control" placeholder="https://example.com/logo.png">
+                            <label class="form-label" for="logoUpload">Upload Logo (JPG or PNG)</label>
+                            <input type="file" id="logoUpload" class="form-control" accept=".jpg,.jpeg,.png" />
+                            <small>Uploading a logo here replaces the URL option.</small>
                         </div>
                         <button type="submit" class="btn btn--primary">Update Branding</button>
                     </form>
@@ -333,17 +365,17 @@
     </div>
 
     <!-- Create Group Modal -->
-    <div id="createGroupModal" class="modal hidden">
+    <div id="createGroupModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="createGroupModalTitle">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Create Group</h3>
-                <button class="modal-close" onclick="closeModal('createGroupModal')">&times;</button>
+                <h3 id="createGroupModalTitle">Create Group</h3>
+                <button class="modal-close" onclick="closeModal('createGroupModal')" aria-label="Close Create Group">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="createGroupForm" onsubmit="createGroup(event)">
                     <div class="form-group">
                         <label class="form-label">Group Name</label>
-                        <input type="text" id="groupName" class="form-control" placeholder="Enter group name" required>
+                        <input type="text" id="groupName" class="form-control" placeholder="Enter group name" required />
                     </div>
                     <div class="form-group">
                         <label class="form-label">Select Members</label>
@@ -358,25 +390,25 @@
     </div>
 
     <!-- Profile Modal -->
-    <div id="profileModal" class="modal hidden">
+    <div id="profileModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Profile</h3>
-                <button class="modal-close" onclick="closeModal('profileModal')">&times;</button>
+                <h3 id="profileModalTitle">Profile</h3>
+                <button class="modal-close" onclick="closeModal('profileModal')" aria-label="Close Profile">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="profileForm" onsubmit="updateProfile(event)">
                     <div class="form-group">
                         <label class="form-label">Full Name</label>
-                        <input type="text" id="profileName" class="form-control" required>
+                        <input type="text" id="profileName" class="form-control" required />
                     </div>
                     <div class="form-group">
                         <label class="form-label">Email</label>
-                        <input type="email" id="profileEmail" class="form-control" required>
+                        <input type="email" id="profileEmail" class="form-control" required />
                     </div>
                     <div class="form-group">
                         <label class="form-label">Phone Number</label>
-                        <input type="tel" id="profilePhone" class="form-control" readonly>
+                        <input type="tel" id="profilePhone" class="form-control" readonly />
                     </div>
                     <button type="submit" class="btn btn--primary">Update Profile</button>
                     <button type="button" class="btn btn--secondary" onclick="showChangePassword()">Change Password</button>
@@ -386,25 +418,25 @@
     </div>
 
     <!-- Change Password Modal -->
-    <div id="passwordModal" class="modal hidden">
+    <div id="passwordModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="passwordModalTitle">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Change Password</h3>
-                <button class="modal-close" onclick="closeModal('passwordModal')">&times;</button>
+                <h3 id="passwordModalTitle">Change Password</h3>
+                <button class="modal-close" onclick="closeModal('passwordModal')" aria-label="Close Change Password">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="passwordForm" onsubmit="changeUserPassword(event)">
                     <div class="form-group">
                         <label class="form-label">Current Password</label>
-                        <input type="password" id="currentPassword" class="form-control" required>
+                        <input type="password" id="currentPassword" class="form-control" required />
                     </div>
                     <div class="form-group">
                         <label class="form-label">New Password</label>
-                        <input type="password" id="newPassword" class="form-control" required>
+                        <input type="password" id="newPassword" class="form-control" required />
                     </div>
                     <div class="form-group">
                         <label class="form-label">Confirm New Password</label>
-                        <input type="password" id="confirmPassword" class="form-control" required>
+                        <input type="password" id="confirmPassword" class="form-control" required />
                     </div>
                     <button type="submit" class="btn btn--primary">Change Password</button>
                     <button type="button" class="btn btn--secondary" onclick="skipPasswordChange()">Skip for Now</button>
@@ -414,17 +446,17 @@
     </div>
 
     <!-- Forgot Password Modal -->
-    <div id="forgotPasswordModal" class="modal hidden">
+    <div id="forgotPasswordModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="forgotPasswordModalTitle">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Reset Password</h3>
-                <button class="modal-close" onclick="closeModal('forgotPasswordModal')">&times;</button>
+                <h3 id="forgotPasswordModalTitle">Reset Password</h3>
+                <button class="modal-close" onclick="closeModal('forgotPasswordModal')" aria-label="Close Reset Password">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="forgotPasswordForm" onsubmit="resetPassword(event)">
                     <div class="form-group">
                         <label class="form-label">Phone Number or Email</label>
-                        <input type="text" id="resetPhone" class="form-control" placeholder="Enter your phone or email" required>
+                        <input type="text" id="resetPhone" class="form-control" placeholder="Enter your phone or email" required />
                     </div>
                     <button type="submit" class="btn btn--primary btn--full-width">Reset Password</button>
                 </form>
@@ -436,11 +468,11 @@
     </div>
 
     <!-- Chat Info Modal -->
-    <div id="chatInfoModal" class="modal hidden">
+    <div id="chatInfoModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="chatInfoModalTitle">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Chat Information</h3>
-                <button class="modal-close" onclick="closeModal('chatInfoModal')">&times;</button>
+                <h3 id="chatInfoModalTitle">Chat Information</h3>
+                <button class="modal-close" onclick="closeModal('chatInfoModal')" aria-label="Close Chat Information">&times;</button>
             </div>
             <div class="modal-body">
                 <div id="chatInfoContent">
@@ -451,9 +483,7 @@
     </div>
 
     <!-- Notifications Container -->
-    <div id="notificationsContainer" class="notifications-container">
-        <!-- Notifications will be dynamically added here -->
-    </div>
+    <div id="notificationsContainer" class="notifications-container" aria-live="polite" aria-atomic="true"></div>
 
     <script src="app.js"></script>
 </body>
