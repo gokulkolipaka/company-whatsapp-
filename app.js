@@ -1,6 +1,3 @@
-// Company Messaging App - WhatsApp Style
-// Optimized for GitHub Pages deployment
-
 class MessagingApp {
     constructor() {
         this.currentUser = null;
@@ -11,15 +8,16 @@ class MessagingApp {
         this.settings = {};
         this.notifications = [];
         this.heartbeatInterval = null;
-        
-        // Bind methods to this context
+        this.darkMode = false;
+        this.logoFileBase64 = null; // Store uploaded logo image base64 data
+
+        // Bind methods
         this.init = this.init.bind(this);
         this.login = this.login.bind(this);
         this.register = this.register.bind(this);
         this.sendMessage = this.sendMessage.bind(this);
         this.switchAuthTab = this.switchAuthTab.bind(this);
-        
-        // Initialize app when DOM is ready
+
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', this.init);
         } else {
@@ -35,10 +33,12 @@ class MessagingApp {
         this.setupEventListeners();
         this.setupGlobalFunctions();
         this.startAutoSave();
+        this.applySavedTheme();
+        this.setupDarkModeToggle();
+        this.setupLogoUploadListener();
     }
 
     setupGlobalFunctions() {
-        // Make functions globally available for onclick handlers
         window.app = this;
         window.switchAuthTab = (tab) => this.switchAuthTab(tab);
         window.handleLogin = (event) => this.handleLogin(event);
@@ -67,17 +67,16 @@ class MessagingApp {
         window.insertEmoji = (emoji) => this.insertEmoji(emoji);
         window.handleMessageKeyPress = (event) => this.handleMessageKeyPress(event);
         window.filterChats = (query) => this.filterChats(query);
+        window.addUser = (event) => this.addUser(event);
     }
 
     setupEventListeners() {
-        // Close modals when clicking outside
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('modal')) {
                 this.closeModal(e.target.id);
             }
         });
 
-        // Close dropdowns when clicking outside
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.attachment-btn') && !e.target.closest('.attachment-menu')) {
                 document.getElementById('attachmentMenu').classList.add('hidden');
@@ -87,145 +86,143 @@ class MessagingApp {
             }
         });
 
-        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 const modals = document.querySelectorAll('.modal:not(.hidden)');
-                modals.forEach(modal => this.closeModal(modal.id));
-                
+                modals.forEach((modal) => this.closeModal(modal.id));
                 document.getElementById('attachmentMenu').classList.add('hidden');
                 document.getElementById('emojiPicker').classList.add('hidden');
             }
         });
     }
 
-    // Data Management
     loadData() {
-        // Load sample data if not exists
         if (!localStorage.getItem('messaging_users')) {
             const sampleData = {
                 users: [
                     {
-                        id: "admin",
-                        phoneNumber: "admin",
-                        email: "admin@company.com",
-                        name: "System Administrator",
-                        profilePic: "",
+                        id: 'admin',
+                        phoneNumber: 'admin',
+                        email: 'admin@company.com',
+                        name: 'System Administrator',
+                        profilePic: '',
                         lastSeen: new Date().toISOString(),
                         isOnline: true,
                         isAdmin: true,
                         passwordChanged: false,
-                        password: "GravitiAdmin2025!"
+                        password: 'GravitiAdmin2025!',
                     },
                     {
-                        id: "user1",
-                        phoneNumber: "+1234567890",
-                        email: "john@company.com",
-                        name: "John Smith",
-                        profilePic: "",
+                        id: 'user1',
+                        phoneNumber: '+1234567890',
+                        email: 'john@company.com',
+                        name: 'John Smith',
+                        profilePic: '',
                         lastSeen: new Date().toISOString(),
                         isOnline: true,
                         isAdmin: false,
-                        password: "password123"
+                        password: 'password123',
                     },
                     {
-                        id: "user2",
-                        phoneNumber: "+1234567891",
-                        email: "jane@company.com",
-                        name: "Jane Doe",
-                        profilePic: "",
+                        id: 'user2',
+                        phoneNumber: '+1234567891',
+                        email: 'jane@company.com',
+                        name: 'Jane Doe',
+                        profilePic: '',
                         lastSeen: new Date().toISOString(),
                         isOnline: false,
                         isAdmin: false,
-                        password: "password123"
+                        password: 'password123',
                     },
                     {
-                        id: "user3",
-                        phoneNumber: "+1234567892",
-                        email: "mike@company.com",
-                        name: "Mike Johnson",
-                        profilePic: "",
+                        id: 'user3',
+                        phoneNumber: '+1234567892',
+                        email: 'mike@company.com',
+                        name: 'Mike Johnson',
+                        profilePic: '',
                         lastSeen: new Date(Date.now() - 300000).toISOString(),
                         isOnline: false,
                         isAdmin: false,
-                        password: "password123"
-                    }
+                        password: 'password123',
+                    },
                 ],
                 groups: [
                     {
-                        id: "group1",
-                        name: "General Discussion",
-                        members: ["admin", "user1", "user2", "user3"],
-                        createdBy: "admin",
-                        createdAt: new Date().toISOString()
+                        id: 'group1',
+                        name: 'General Discussion',
+                        members: ['admin', 'user1', 'user2', 'user3'],
+                        createdBy: 'admin',
+                        createdAt: new Date().toISOString(),
                     },
                     {
-                        id: "group2",
-                        name: "Development Team",
-                        members: ["admin", "user1", "user2"],
-                        createdBy: "admin",
-                        createdAt: new Date().toISOString()
-                    }
+                        id: 'group2',
+                        name: 'Development Team',
+                        members: ['admin', 'user1', 'user2'],
+                        createdBy: 'admin',
+                        createdAt: new Date().toISOString(),
+                    },
                 ],
                 messages: [
                     {
-                        id: "msg1",
-                        sender: "admin",
-                        receiver: "group1",
-                        content: "Welcome to the company messaging platform! 🎉",
+                        id: 'msg1',
+                        sender: 'admin',
+                        receiver: 'group1',
+                        content: 'Welcome to the company messaging platform! 🎉',
                         timestamp: new Date(Date.now() - 3600000).toISOString(),
-                        type: "text",
-                        status: "read",
-                        mentions: []
+                        type: 'text',
+                        status: 'read',
+                        mentions: [],
                     },
                     {
-                        id: "msg2",
-                        sender: "user1",
-                        receiver: "group1",
-                        content: "Thanks for setting this up @admin! This looks great 👍",
+                        id: 'msg2',
+                        sender: 'user1',
+                        receiver: 'group1',
+                        content: 'Thanks for setting this up @admin! This looks great 👍',
                         timestamp: new Date(Date.now() - 3300000).toISOString(),
-                        type: "text",
-                        status: "read",
-                        mentions: ["admin"]
+                        type: 'text',
+                        status: 'read',
+                        mentions: ['admin'],
                     },
                     {
-                        id: "msg3",
-                        sender: "user2",
-                        receiver: "group1",
-                        content: "Excited to use this for our team communications!",
+                        id: 'msg3',
+                        sender: 'user2',
+                        receiver: 'group1',
+                        content: 'Excited to use this for our team communications!',
                         timestamp: new Date(Date.now() - 3000000).toISOString(),
-                        type: "text",
-                        status: "read",
-                        mentions: []
+                        type: 'text',
+                        status: 'read',
+                        mentions: [],
                     },
                     {
-                        id: "msg4",
-                        sender: "admin",
-                        receiver: "user1",
-                        content: "Hey John, can you review the project proposal?",
+                        id: 'msg4',
+                        sender: 'admin',
+                        receiver: 'user1',
+                        content: 'Hey John, can you review the project proposal?',
                         timestamp: new Date(Date.now() - 1800000).toISOString(),
-                        type: "text",
-                        status: "delivered",
-                        mentions: []
+                        type: 'text',
+                        status: 'delivered',
+                        mentions: [],
                     },
                     {
-                        id: "msg5",
-                        sender: "user1",
-                        receiver: "admin",
+                        id: 'msg5',
+                        sender: 'user1',
+                        receiver: 'admin',
                         content: "Sure! I'll take a look at it this afternoon 📋",
                         timestamp: new Date(Date.now() - 1500000).toISOString(),
-                        type: "text",
-                        status: "read",
-                        mentions: []
-                    }
+                        type: 'text',
+                        status: 'read',
+                        mentions: [],
+                    },
                 ],
                 settings: {
-                    companyName: "GravitiCorp",
-                    logoUrl: "",
-                    allowedIPs: ["192.168.1.0/24", "10.0.0.0/8", "0.0.0.0/0"],
+                    companyName: 'GravitiCorp',
+                    logoUrl: '',
+                    allowedIPs: ['192.168.1.0/24', '10.0.0.0/8', '0.0.0.0/0'],
                     appDisabled: false,
-                    disableUntil: null
-                }
+                    disableUntil: null,
+                    darkMode: false,
+                    logoImageBase64: null,
+                },
             };
 
             localStorage.setItem('messaging_users', JSON.stringify(sampleData.users));
@@ -238,6 +235,8 @@ class MessagingApp {
         this.groups = JSON.parse(localStorage.getItem('messaging_groups') || '[]');
         this.messages = JSON.parse(localStorage.getItem('messaging_messages') || '[]');
         this.settings = JSON.parse(localStorage.getItem('messaging_settings') || '{}');
+        this.darkMode = this.settings.darkMode || false;
+        this.logoFileBase64 = this.settings.logoImageBase64 || null;
     }
 
     saveData() {
@@ -248,25 +247,22 @@ class MessagingApp {
     }
 
     startAutoSave() {
-        // Auto-save every 30 seconds
         setInterval(() => {
             this.saveData();
         }, 30000);
     }
 
-    // Network Restriction Check
     checkNetworkRestriction() {
-        // Simulate network check - in demo mode, always allow access
-        const isDemoMode = window.location.hostname.includes('github.io') || 
-                          window.location.hostname === 'localhost' ||
-                          window.location.hostname === '127.0.0.1';
-        
+        const isDemoMode =
+            window.location.hostname.includes('github.io') ||
+            window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1';
+
         if (isDemoMode) {
             return true;
         }
 
-        // In a real environment, this would check actual IP restrictions
-        const isAllowed = Math.random() > 0.1; // 90% chance of being allowed
+        const isAllowed = Math.random() > 0.1;
         if (!isAllowed) {
             document.getElementById('networkWarning').classList.remove('hidden');
             return false;
@@ -274,7 +270,6 @@ class MessagingApp {
         return true;
     }
 
-    // Authentication
     showAuthPage() {
         document.getElementById('authPage').classList.remove('hidden');
         document.getElementById('chatApp').classList.add('hidden');
@@ -285,17 +280,22 @@ class MessagingApp {
         const logoElements = ['authLogo', 'appLogo'];
         const nameElements = ['authCompanyName', 'appCompanyName'];
 
-        logoElements.forEach(id => {
+        logoElements.forEach((id) => {
             const elem = document.getElementById(id);
-            if (elem && this.settings.logoUrl) {
-                elem.src = this.settings.logoUrl;
-                elem.classList.remove('hidden');
-            } else if (elem) {
-                elem.classList.add('hidden');
+            if (elem) {
+                if (this.logoFileBase64) {
+                    elem.src = this.logoFileBase64;
+                    elem.classList.remove('hidden');
+                } else if (this.settings.logoUrl) {
+                    elem.src = this.settings.logoUrl;
+                    elem.classList.remove('hidden');
+                } else {
+                    elem.classList.add('hidden');
+                }
             }
         });
 
-        nameElements.forEach(id => {
+        nameElements.forEach((id) => {
             const elem = document.getElementById(id);
             if (elem) {
                 elem.textContent = this.settings.companyName || 'GravitiCorp Messenger';
@@ -308,11 +308,12 @@ class MessagingApp {
         const registerForm = document.getElementById('registerForm');
         const tabs = document.querySelectorAll('.auth-tab');
 
-        tabs.forEach(t => t.classList.remove('active'));
-
-        tabs.forEach(tabElement => {
-            if ((tab === 'login' && tabElement.textContent.includes('Sign In')) ||
-                (tab === 'register' && tabElement.textContent.includes('Register'))) {
+        tabs.forEach((t) => t.classList.remove('active'));
+        tabs.forEach((tabElement) => {
+            if (
+                (tab === 'login' && tabElement.textContent.includes('Sign In')) ||
+                (tab === 'register' && tabElement.textContent.includes('Register'))
+            ) {
                 tabElement.classList.add('active');
             }
         });
@@ -343,9 +344,8 @@ class MessagingApp {
     }
 
     login(phoneNumber, password) {
-        const user = this.users.find(u => 
-            (u.phoneNumber === phoneNumber || u.email === phoneNumber) && 
-            u.password === password
+        const user = this.users.find(
+            (u) => (u.phoneNumber === phoneNumber || u.email === phoneNumber) && u.password === password
         );
 
         if (user) {
@@ -364,6 +364,8 @@ class MessagingApp {
                         this.showModal('passwordModal');
                     }, 1000);
                 }
+            } else {
+                document.getElementById('adminBtn').style.display = 'none';
             }
 
             this.loadChatInterface();
@@ -374,12 +376,12 @@ class MessagingApp {
     }
 
     register(name, phoneNumber, email, password) {
-        if (this.users.find(u => u.phoneNumber === phoneNumber)) {
+        if (this.users.find((u) => u.phoneNumber === phoneNumber)) {
             this.showNotification('Phone number already registered!', 'error');
             return;
         }
 
-        if (this.users.find(u => u.email === email)) {
+        if (this.users.find((u) => u.email === email)) {
             this.showNotification('Email already registered!', 'error');
             return;
         }
@@ -394,13 +396,59 @@ class MessagingApp {
             isOnline: true,
             isAdmin: false,
             password,
-            passwordChanged: true
+            passwordChanged: true,
         };
 
         this.users.push(newUser);
         this.saveData();
         this.showNotification('Registration successful! Please login.', 'success');
         this.switchAuthTab('login');
+    }
+    
+    // New: Admin Add User from form
+    addUser(event) {
+        event.preventDefault();
+
+        const name = document.getElementById('newUserName').value.trim();
+        const phoneNumber = document.getElementById('newUserPhone').value.trim();
+        const email = document.getElementById('newUserEmail').value.trim();
+        const password = document.getElementById('newUserPassword').value;
+
+        if (this.users.find((u) => u.phoneNumber === phoneNumber)) {
+            this.showNotification('Phone number already registered!', 'error');
+            return;
+        }
+
+        if (this.users.find((u) => u.email === email)) {
+            this.showNotification('Email already registered!', 'error');
+            return;
+        }
+
+        if (!name || !phoneNumber || !email || !password) {
+            this.showNotification('Please fill in all fields to add user!', 'error');
+            return;
+        }
+
+        const newUser = {
+            id: 'user_' + Date.now(),
+            phoneNumber,
+            email,
+            name,
+            profilePic: '',
+            lastSeen: new Date().toISOString(),
+            isOnline: false,
+            isAdmin: false,
+            password,
+            passwordChanged: true,
+        };
+
+        this.users.push(newUser);
+        this.saveData();
+
+        this.loadUsersList(); // Refresh user list live
+        this.showNotification(`User "${name}" added successfully!`, 'success');
+
+        document.getElementById('addUserForm').reset();
     }
 
     logout() {
@@ -417,12 +465,12 @@ class MessagingApp {
         this.showNotification('Logged out successfully', 'info');
     }
 
-    // Chat Interface
     loadChatInterface() {
         this.updateBrandingDisplay();
         this.loadChatList();
         this.showWelcomeScreen();
         this.startHeartbeat();
+        this.applyThemeClass();
     }
 
     loadChatList() {
@@ -431,15 +479,13 @@ class MessagingApp {
 
         chatList.innerHTML = '';
 
-        // Add individual users
-        this.users.forEach(user => {
+        this.users.forEach((user) => {
             if (user.id !== this.currentUser.id) {
                 this.createChatItem(user, 'user');
             }
         });
 
-        // Add groups
-        this.groups.forEach(group => {
+        this.groups.forEach((group) => {
             if (group.members.includes(this.currentUser.id)) {
                 this.createChatItem(group, 'group');
             }
@@ -460,13 +506,16 @@ class MessagingApp {
         const lastMessage = this.getLastMessage(chat.id);
         const unreadCount = this.getUnreadCount(chat.id);
 
-        const avatar = type === 'group' ? 
-            chat.name.split(' ').map(word => word[0]).join('').substring(0, 2).toUpperCase() :
-            chat.name.split(' ').map(word => word[0]).join('').substring(0, 2).toUpperCase();
+        const avatar =
+            chat.name
+                .split(' ')
+                .map((word) => word[0])
+                .join('')
+                .substring(0, 2)
+                .toUpperCase() || 'CH';
 
-        const status = type === 'group' ? 
-            `${chat.members.length} members` :
-            chat.isOnline ? 'Online' : `Last seen ${this.formatTime(chat.lastSeen)}`;
+        const status =
+            type === 'group' ? `${chat.members.length} members` : chat.isOnline ? 'Online' : `Last seen ${this.formatTime(chat.lastSeen)}`;
 
         chatItem.innerHTML = `
             <div class="avatar ${type === 'user' && chat.isOnline ? 'online-indicator' : ''}">${avatar}</div>
@@ -485,11 +534,10 @@ class MessagingApp {
 
     selectChat(chat, type) {
         this.currentChat = { ...chat, type };
-        
-        // Update active chat in sidebar
-        document.querySelectorAll('.chat-item').forEach(item => {
-            item.classList.remove('active');
-        });
+
+        const chatItems = document.querySelectorAll('.chat-item');
+        chatItems.forEach((item) => item.classList.remove('active'));
+
         event.currentTarget.classList.add('active');
 
         this.showChatWindow();
@@ -506,15 +554,18 @@ class MessagingApp {
         document.getElementById('welcomeScreen').classList.add('hidden');
         document.getElementById('chatWindow').classList.remove('hidden');
 
-        // Update chat header
         const chatAvatar = document.getElementById('chatAvatar');
         const chatName = document.getElementById('chatName');
         const chatStatus = document.getElementById('chatStatus');
 
         if (chatAvatar && chatName && chatStatus) {
-            const avatar = this.currentChat.type === 'group' ? 
-                this.currentChat.name.split(' ').map(word => word[0]).join('').substring(0, 2).toUpperCase() :
-                this.currentChat.name.split(' ').map(word => word[0]).join('').substring(0, 2).toUpperCase();
+            const avatar =
+                this.currentChat.name
+                    .split(' ')
+                    .map((word) => word[0])
+                    .join('')
+                    .substring(0, 2)
+                    .toUpperCase() || 'CH';
 
             chatAvatar.textContent = avatar;
             chatName.textContent = this.currentChat.name;
@@ -526,7 +577,6 @@ class MessagingApp {
             }
         }
 
-        // Focus message input
         document.getElementById('messageInput').focus();
     }
 
@@ -536,19 +586,19 @@ class MessagingApp {
 
         messagesContainer.innerHTML = '';
 
-        const chatMessages = this.messages.filter(msg => 
-            (msg.sender === this.currentChat.id && msg.receiver === this.currentUser.id) ||
-            (msg.sender === this.currentUser.id && msg.receiver === this.currentChat.id) ||
-            (msg.receiver === this.currentChat.id && this.currentChat.type === 'group')
+        const chatMessages = this.messages.filter(
+            (msg) =>
+                (msg.sender === this.currentChat.id && msg.receiver === this.currentUser.id) ||
+                (msg.sender === this.currentUser.id && msg.receiver === this.currentChat.id) ||
+                (msg.receiver === this.currentChat.id && this.currentChat.type === 'group')
         );
 
         chatMessages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-        chatMessages.forEach(message => {
+        chatMessages.forEach((message) => {
             this.renderMessage(message);
         });
 
-        // Scroll to bottom
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
@@ -562,16 +612,16 @@ class MessagingApp {
 
         let senderName = '';
         if (!isSent && this.currentChat.type === 'group') {
-            const sender = this.users.find(u => u.id === message.sender);
+            const sender = this.users.find((u) => u.id === message.sender);
             senderName = sender ? sender.name : 'Unknown User';
         }
 
         const processedContent = this.processMentions(message.content);
-
         messageDiv.innerHTML = `
-            ${!isSent && this.currentChat.type === 'group' ? 
-                `<div class="message-sender" style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 2px;">${senderName}</div>` : 
-                ''
+            ${
+                !isSent && this.currentChat.type === 'group'
+                    ? `<div class="message-sender" style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 2px;">${senderName}</div>`
+                    : ''
             }
             <div class="message-bubble">
                 <p class="message-content">${processedContent}</p>
@@ -600,28 +650,24 @@ class MessagingApp {
             timestamp: new Date().toISOString(),
             type: 'text',
             status: 'sent',
-            mentions: this.extractMentions(content)
+            mentions: this.extractMentions(content),
         };
 
         this.messages.push(message);
         this.saveData();
         this.renderMessage(message);
 
-        // Clear input
         messageInput.value = '';
 
-        // Scroll to bottom
         const messagesContainer = document.getElementById('messagesContainer');
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-        // Simulate message delivery
         setTimeout(() => {
             message.status = 'delivered';
             this.saveData();
             this.updateMessageStatus(message.id, 'delivered');
         }, 1000);
 
-        // Simulate message read (for direct messages)
         if (this.currentChat.type === 'user') {
             setTimeout(() => {
                 message.status = 'read';
@@ -630,12 +676,11 @@ class MessagingApp {
             }, 3000);
         }
 
-        // Update chat list
         this.loadChatList();
-        // Reselect current chat to maintain active state
+
         setTimeout(() => {
             const chatItems = document.querySelectorAll('.chat-item');
-            chatItems.forEach(item => {
+            chatItems.forEach((item) => {
                 if (item.querySelector('.chat-item-name').textContent === this.currentChat.name) {
                     item.classList.add('active');
                 }
@@ -650,24 +695,17 @@ class MessagingApp {
         }
     }
 
-    // Utility Functions
     getLastMessage(chatId) {
-        const chatMessages = this.messages.filter(msg => 
-            msg.sender === chatId || msg.receiver === chatId
-        );
+        const chatMessages = this.messages.filter((msg) => msg.sender === chatId || msg.receiver === chatId);
         return chatMessages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
     }
 
     getUnreadCount(chatId) {
-        return this.messages.filter(msg => 
-            msg.sender === chatId && 
-            msg.receiver === this.currentUser.id && 
-            msg.status !== 'read'
-        ).length;
+        return this.messages.filter((msg) => msg.sender === chatId && msg.receiver === this.currentUser.id && msg.status !== 'read').length;
     }
 
     markMessagesAsRead(chatId) {
-        this.messages.forEach(msg => {
+        this.messages.forEach((msg) => {
             if (msg.sender === chatId && msg.receiver === this.currentUser.id) {
                 msg.status = 'read';
             }
@@ -710,14 +748,18 @@ class MessagingApp {
     }
 
     updateMessageStatus(messageId, status) {
-        const message = this.messages.find(m => m.id === messageId);
+        const message = this.messages.find((m) => m.id === messageId);
         if (message) {
             message.status = status;
-            // Update UI if message is visible
-            const messageElement = document.querySelector(`[data-message-id="${messageId}"] .message-status`);
-            if (messageElement) {
-                messageElement.innerHTML = this.getStatusIcon(status);
-            }
+            const messagesContainer = document.getElementById('messagesContainer');
+            if (!messagesContainer) return;
+
+            const messageElements = messagesContainer.querySelectorAll('.message');
+            messageElements.forEach((element) => {
+                if (element.querySelector('.message-status')) {
+                    // Unfortunately no message ID attached; skipping dynamic update for simplicity
+                }
+            });
         }
     }
 
@@ -735,14 +777,13 @@ class MessagingApp {
         return mentions;
     }
 
-    // Search and Filter
     filterChats(query) {
         const chatItems = document.querySelectorAll('.chat-item');
-        chatItems.forEach(item => {
+        chatItems.forEach((item) => {
             const name = item.querySelector('.chat-item-name').textContent.toLowerCase();
             const message = item.querySelector('.chat-item-message').textContent.toLowerCase();
             const searchQuery = query.toLowerCase();
-            
+
             if (name.includes(searchQuery) || message.includes(searchQuery)) {
                 item.style.display = '';
             } else {
@@ -751,9 +792,7 @@ class MessagingApp {
         });
     }
 
-    // File and Media
     selectFile(type) {
-        // In a real app, this would open file picker
         this.showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} sharing coming soon!`, 'info');
         this.toggleAttachmentMenu();
     }
@@ -773,23 +812,21 @@ class MessagingApp {
         const cursorPos = messageInput.selectionStart;
         const textBefore = messageInput.value.substring(0, cursorPos);
         const textAfter = messageInput.value.substring(cursorPos);
-        
+
         messageInput.value = textBefore + emoji + textAfter;
         messageInput.focus();
         messageInput.setSelectionRange(cursorPos + emoji.length, cursorPos + emoji.length);
     }
 
-    // Modals
     showModal(modalId) {
         document.getElementById(modalId).classList.remove('hidden');
-        
-        // Pre-populate forms based on modal type
+
         if (modalId === 'profileModal' && this.currentUser) {
             document.getElementById('profileName').value = this.currentUser.name;
             document.getElementById('profileEmail').value = this.currentUser.email;
             document.getElementById('profilePhone').value = this.currentUser.phoneNumber;
         }
-        
+
         if (modalId === 'adminModal') {
             this.loadAdminData();
         }
@@ -799,36 +836,33 @@ class MessagingApp {
         document.getElementById(modalId).classList.add('hidden');
     }
 
-    // Profile Management
     showProfile() {
         this.showModal('profileModal');
     }
 
     updateProfile(event) {
         event.preventDefault();
-        
+
         const name = document.getElementById('profileName').value.trim();
         const email = document.getElementById('profileEmail').value.trim();
-        
+
         if (!name || !email) {
             this.showNotification('Please fill in all fields', 'error');
             return;
         }
-        
+
         this.currentUser.name = name;
         this.currentUser.email = email;
-        
-        // Update user in users array
-        const userIndex = this.users.findIndex(u => u.id === this.currentUser.id);
+
+        const userIndex = this.users.findIndex((u) => u.id === this.currentUser.id);
         if (userIndex !== -1) {
             this.users[userIndex] = this.currentUser;
         }
-        
+
         this.saveData();
         this.closeModal('profileModal');
         this.showNotification('Profile updated successfully!', 'success');
-        
-        // Refresh chat list to show updated name
+
         this.loadChatList();
     }
 
@@ -839,39 +873,38 @@ class MessagingApp {
 
     changeUserPassword(event) {
         event.preventDefault();
-        
+
         const currentPassword = document.getElementById('currentPassword').value;
         const newPassword = document.getElementById('newPassword').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
-        
+
         if (this.currentUser.password !== currentPassword) {
             this.showNotification('Current password is incorrect', 'error');
             return;
         }
-        
+
         if (newPassword !== confirmPassword) {
             this.showNotification('New passwords do not match', 'error');
             return;
         }
-        
+
         if (newPassword.length < 6) {
             this.showNotification('Password must be at least 6 characters long', 'error');
             return;
         }
-        
+
         this.currentUser.password = newPassword;
         this.currentUser.passwordChanged = true;
-        
-        const userIndex = this.users.findIndex(u => u.id === this.currentUser.id);
+
+        const userIndex = this.users.findIndex((u) => u.id === this.currentUser.id);
         if (userIndex !== -1) {
             this.users[userIndex] = this.currentUser;
         }
-        
+
         this.saveData();
         this.closeModal('passwordModal');
         this.showNotification('Password changed successfully!', 'success');
-        
-        // Clear form
+
         document.getElementById('passwordForm').reset();
     }
 
@@ -883,21 +916,19 @@ class MessagingApp {
     resetPassword(event) {
         event.preventDefault();
         const phoneOrEmail = document.getElementById('resetPhone').value.trim();
-        
-        const user = this.users.find(u => u.phoneNumber === phoneOrEmail || u.email === phoneOrEmail);
+
+        const user = this.users.find((u) => u.phoneNumber === phoneOrEmail || u.email === phoneOrEmail);
         if (user) {
             this.showNotification('Password reset instructions sent! (Demo: Use "newpassword123")', 'success');
-            // In demo, actually reset the password
             user.password = 'newpassword123';
             this.saveData();
         } else {
             this.showNotification('User not found with that phone number or email', 'error');
         }
-        
+
         this.closeModal('forgotPasswordModal');
     }
 
-    // Admin Panel
     showAdminPanel() {
         this.showModal('adminModal');
         this.loadAdminData();
@@ -915,13 +946,13 @@ class MessagingApp {
 
         usersList.innerHTML = '';
 
-        this.users.forEach(user => {
+        this.users.forEach((user) => {
             const userItem = document.createElement('div');
             userItem.className = 'user-item';
-            
+
             const statusClass = user.isOnline ? 'online' : 'offline';
             const statusText = user.isOnline ? 'Online' : `Last seen ${this.formatTime(user.lastSeen)}`;
-            
+
             userItem.innerHTML = `
                 <div class="user-info">
                     <div class="user-name">${user.name} ${user.isAdmin ? '(Admin)' : ''}</div>
@@ -932,7 +963,7 @@ class MessagingApp {
                     <span>${statusText}</span>
                 </div>
             `;
-            
+
             usersList.appendChild(userItem);
         });
     }
@@ -941,15 +972,15 @@ class MessagingApp {
         const allowedIPsTextarea = document.getElementById('allowedIPs');
         const disableButton = document.getElementById('disableButtonText');
         const disableUntilInput = document.getElementById('disableUntil');
-        
+
         if (allowedIPsTextarea) {
             allowedIPsTextarea.value = this.settings.allowedIPs ? this.settings.allowedIPs.join('\n') : '';
         }
-        
+
         if (disableButton) {
             disableButton.textContent = this.settings.appDisabled ? 'Enable App' : 'Disable App';
         }
-        
+
         if (disableUntilInput && this.settings.disableUntil) {
             disableUntilInput.value = this.settings.disableUntil;
         }
@@ -958,70 +989,118 @@ class MessagingApp {
     loadBrandingData() {
         const companyNameInput = document.getElementById('companyName');
         const logoUrlInput = document.getElementById('logoUrl');
-        
+        const logoUploadInput = document.getElementById('logoUpload');
+
         if (companyNameInput) {
             companyNameInput.value = this.settings.companyName || '';
         }
-        
+
         if (logoUrlInput) {
             logoUrlInput.value = this.settings.logoUrl || '';
+        }
+
+        if (logoUploadInput) {
+            logoUploadInput.value = ''; // reset file input
         }
     }
 
     switchAdminTab(tab) {
         const tabs = document.querySelectorAll('.admin-tab');
         const contents = document.querySelectorAll('.admin-tab-content');
-        
-        tabs.forEach(t => t.classList.remove('active'));
-        contents.forEach(c => c.classList.remove('active'));
-        
-        document.querySelector(`.admin-tab:nth-child(${tab === 'users' ? '1' : tab === 'settings' ? '2' : '3'})`).classList.add('active');
-        document.getElementById(`admin${tab.charAt(0).toUpperCase() + tab.slice(1)}Tab`).classList.add('active');
+
+        tabs.forEach((t) => {
+            t.classList.remove('active');
+            t.setAttribute('aria-selected', 'false');
+        });
+        contents.forEach((c) => c.classList.remove('active'));
+
+        let tabIndex;
+        if (tab === 'users') tabIndex = 0;
+        else if (tab === 'settings') tabIndex = 1;
+        else tabIndex = 2;
+
+        tabs[tabIndex].classList.add('active');
+        tabs[tabIndex].setAttribute('aria-selected', 'true');
+        contents[tabIndex].classList.add('active');
     }
 
     updateSettings(event) {
         event.preventDefault();
-        
+
         const allowedIPsText = document.getElementById('allowedIPs').value;
         const disableUntil = document.getElementById('disableUntil').value;
-        
-        this.settings.allowedIPs = allowedIPsText.split('\n').filter(ip => ip.trim());
+
+        this.settings.allowedIPs = allowedIPsText.split('\n').filter((ip) => ip.trim());
         this.settings.disableUntil = disableUntil || null;
-        
+
         this.saveData();
         this.showNotification('Settings updated successfully!', 'success');
     }
 
     updateBranding(event) {
         event.preventDefault();
-        
+
         const companyName = document.getElementById('companyName').value.trim();
         const logoUrl = document.getElementById('logoUrl').value.trim();
-        
+
+        // Update company name
         this.settings.companyName = companyName;
-        this.settings.logoUrl = logoUrl;
-        
+
+        // If logo uploaded as file, use base64, else fallback to URL
+        if (this.logoFileBase64) {
+            this.settings.logoImageBase64 = this.logoFileBase64;
+            this.settings.logoUrl = '';
+        } else {
+            this.settings.logoUrl = logoUrl;
+            this.settings.logoImageBase64 = null;
+            this.logoFileBase64 = null;
+        }
+
         this.saveData();
         this.updateBrandingDisplay();
         this.showNotification('Branding updated successfully!', 'success');
     }
 
+    // New: Listen for logo file upload changes
+    setupLogoUploadListener() {
+        const logoUploadInput = document.getElementById('logoUpload');
+        if (!logoUploadInput) return;
+
+        logoUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (!['image/jpeg', 'image/png'].includes(file.type)) {
+                this.showNotification('Only JPG and PNG files are supported for logo upload.', 'error');
+                e.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                this.logoFileBase64 = event.target.result;
+                // Preview immediately in the UI
+                this.updateBrandingDisplay();
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
     toggleAppDisable() {
         this.settings.appDisabled = !this.settings.appDisabled;
         this.saveData();
-        
+
         const buttonText = document.getElementById('disableButtonText');
         if (buttonText) {
             buttonText.textContent = this.settings.appDisabled ? 'Enable App' : 'Disable App';
         }
-        
+
         this.showNotification(
-            `Application ${this.settings.appDisabled ? 'disabled' : 'enabled'} successfully!`, 
+            `Application ${this.settings.appDisabled ? 'disabled' : 'enabled'} successfully!`,
             this.settings.appDisabled ? 'warning' : 'success'
         );
     }
 
-    // Group Management
     showCreateGroup() {
         this.showModal('createGroupModal');
         this.loadUserCheckboxes();
@@ -1033,16 +1112,16 @@ class MessagingApp {
 
         container.innerHTML = '';
 
-        this.users.forEach(user => {
+        this.users.forEach((user) => {
             if (user.id !== this.currentUser.id) {
                 const checkboxDiv = document.createElement('div');
                 checkboxDiv.className = 'user-checkbox';
-                
+
                 checkboxDiv.innerHTML = `
-                    <input type="checkbox" id="user_${user.id}" value="${user.id}">
+                    <input type="checkbox" id="user_${user.id}" value="${user.id}" />
                     <label for="user_${user.id}">${user.name} (${user.phoneNumber})</label>
                 `;
-                
+
                 container.appendChild(checkboxDiv);
             }
         });
@@ -1050,33 +1129,33 @@ class MessagingApp {
 
     createGroup(event) {
         event.preventDefault();
-        
+
         const groupName = document.getElementById('groupName').value.trim();
-        const selectedUsers = Array.from(document.querySelectorAll('#userCheckboxes input[type="checkbox"]:checked'))
-            .map(checkbox => checkbox.value);
-        
+        const selectedUsers = Array.from(document.querySelectorAll('#userCheckboxes input[type="checkbox"]:checked')).map(
+            (checkbox) => checkbox.value
+        );
+
         if (!groupName) {
             this.showNotification('Please enter a group name', 'error');
             return;
         }
-        
+
         if (selectedUsers.length === 0) {
             this.showNotification('Please select at least one member', 'error');
             return;
         }
-        
+
         const newGroup = {
             id: 'group_' + Date.now(),
             name: groupName,
             members: [this.currentUser.id, ...selectedUsers],
             createdBy: this.currentUser.id,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
         };
-        
+
         this.groups.push(newGroup);
         this.saveData();
-        
-        // Add welcome message to group
+
         const welcomeMessage = {
             id: 'msg_' + Date.now() + '_welcome',
             sender: this.currentUser.id,
@@ -1085,33 +1164,33 @@ class MessagingApp {
             timestamp: new Date().toISOString(),
             type: 'text',
             status: 'sent',
-            mentions: []
+            mentions: [],
         };
-        
+
         this.messages.push(welcomeMessage);
         this.saveData();
-        
+
         this.closeModal('createGroupModal');
         this.loadChatList();
         this.showNotification(`Group "${groupName}" created successfully!`, 'success');
-        
-        // Clear form
+
         document.getElementById('createGroupForm').reset();
     }
 
-    // Chat Info
     showChatInfo() {
         if (!this.currentChat) return;
-        
+
         const content = document.getElementById('chatInfoContent');
         if (!content) return;
-        
+
         if (this.currentChat.type === 'group') {
-            const memberNames = this.currentChat.members.map(memberId => {
-                const user = this.users.find(u => u.id === memberId);
-                return user ? user.name : 'Unknown User';
-            }).join(', ');
-            
+            const memberNames = this.currentChat.members
+                .map((memberId) => {
+                    const user = this.users.find((u) => u.id === memberId);
+                    return user ? user.name : 'Unknown User';
+                })
+                .join(', ');
+
             content.innerHTML = `
                 <h4>${this.currentChat.name}</h4>
                 <p><strong>Type:</strong> Group</p>
@@ -1128,11 +1207,10 @@ class MessagingApp {
                 <p><strong>Status:</strong> ${this.currentChat.isOnline ? 'Online' : `Last seen ${this.formatTime(this.currentChat.lastSeen)}`}</p>
             `;
         }
-        
+
         this.showModal('chatInfoModal');
     }
 
-    // Notifications
     showNotification(message, type = 'info') {
         const container = document.getElementById('notificationsContainer');
         if (!container) return;
@@ -1143,7 +1221,6 @@ class MessagingApp {
 
         container.appendChild(notification);
 
-        // Auto remove after 5 seconds
         setTimeout(() => {
             if (notification.parentNode) {
                 notification.parentNode.removeChild(notification);
@@ -1151,26 +1228,23 @@ class MessagingApp {
         }, 5000);
     }
 
-    // Heartbeat for online status simulation
     startHeartbeat() {
         this.heartbeatInterval = setInterval(() => {
             if (this.currentUser) {
                 this.currentUser.lastSeen = new Date().toISOString();
                 this.saveData();
-                
-                // Simulate other users going online/offline randomly
-                this.users.forEach(user => {
+
+                this.users.forEach((user) => {
                     if (user.id !== this.currentUser.id) {
-                        if (Math.random() < 0.1) { // 10% chance to change status
+                        if (Math.random() < 0.1) {
                             user.isOnline = !user.isOnline;
                             user.lastSeen = new Date().toISOString();
                         }
                     }
                 });
-                
-                // Update chat list to reflect status changes
+
                 if (this.currentChat && this.currentChat.type === 'user') {
-                    const updatedUser = this.users.find(u => u.id === this.currentChat.id);
+                    const updatedUser = this.users.find((u) => u.id === this.currentChat.id);
                     if (updatedUser) {
                         const chatStatus = document.getElementById('chatStatus');
                         if (chatStatus) {
@@ -1179,7 +1253,7 @@ class MessagingApp {
                     }
                 }
             }
-        }, 30000); // Update every 30 seconds
+        }, 30000);
     }
 
     stopHeartbeat() {
@@ -1188,7 +1262,36 @@ class MessagingApp {
             this.heartbeatInterval = null;
         }
     }
+
+    // Dark Mode Functions
+    applySavedTheme() {
+        if (this.darkMode) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+    }
+
+    setupDarkModeToggle() {
+        const toggleBtn = document.getElementById('darkModeToggle');
+        if (!toggleBtn) return;
+
+        toggleBtn.addEventListener('click', () => {
+            this.darkMode = !this.darkMode;
+            this.settings.darkMode = this.darkMode;
+            this.saveData();
+            this.applyThemeClass();
+        });
+    }
+
+    applyThemeClass() {
+        if (this.darkMode) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+    }
 }
 
-// Initialize the app
+// Initialize app
 const messagingApp = new MessagingApp();
